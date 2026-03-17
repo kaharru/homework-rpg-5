@@ -12,47 +12,61 @@ import com.narxoz.rpg.hero.HeroProfile;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("=== Homework 5 Demo: Decorator + Facade ===\n");
 
-        // TODO: Create a hero and a boss with your own meaningful stats.
-        HeroProfile hero = new HeroProfile("TODO Hero", 100);
-        BossEnemy boss = new BossEnemy("TODO Boss", 120, 15);
+        // 1. make a hero and boss
+        HeroProfile hero = new HeroProfile("Arthur the Knight", 150);
+        BossEnemy boss = new BossEnemy("Ancient Dragon", 250, 20);
 
-        // TODO: Start with a base action and then create several decorated versions.
-        AttackAction basic = new BasicAttack("Strike", 10);
-        AttackAction enhanced = new FireRuneDecorator(
+        // 2. use a decor
+
+        // Комбинация А: basic attack
+        AttackAction basic = new BasicAttack("Sword Strike", 20);
+
+        // Комбинация Б: attack with attack
+        AttackAction fireAttack = new FireRuneDecorator(basic);
+
+        // Комбинация В: (Critical + Poison + Basic)
+        AttackAction deadlyAttack = new CriticalFocusDecorator(
+                new PoisonCoatingDecorator(basic)
+        );
+
+        // Комбинация e: the best attack
+        AttackAction ultimateAttack = new FireRuneDecorator(
                 new PoisonCoatingDecorator(
-                        new CriticalFocusDecorator(basic)
+                        new CriticalFocusDecorator(new BasicAttack("Ultimate Smash", 25))
                 )
         );
 
-        System.out.println("--- Decorator Preview ---");
-        System.out.println("Base action: " + basic.getActionName());
-        System.out.println("Base damage: " + basic.getDamage());
-        System.out.println("Base effects: " + basic.getEffectSummary());
-        System.out.println();
-        System.out.println("Enhanced action: " + enhanced.getActionName());
-        System.out.println("Enhanced damage: " + enhanced.getDamage());
-        System.out.println("Enhanced effects: " + enhanced.getEffectSummary());
+        // --- Decorator Proof
+        System.out.println("--- Decorator Power Showcase ---");
+        printAttackDetails(basic);
+        printAttackDetails(fireAttack);
+        printAttackDetails(deadlyAttack);
+        printAttackDetails(ultimateAttack);
 
-        // TODO: Replace the placeholder preview above with richer proof of runtime composition.
+        // 3. start Facade through Dungeon
+        System.out.println("\n--- Facade: Entering the Dungeon ---");
+        DungeonFacade facade = new DungeonFacade().setRandomSeed(12345L);
 
-        System.out.println("\n--- Facade Preview ---");
-        DungeonFacade facade = new DungeonFacade().setRandomSeed(42L);
-        AdventureResult result = facade.runAdventure(hero, boss, enhanced);
+        // attack to dragon
+        AdventureResult result = facade.runAdventure(hero, boss, ultimateAttack);
 
+
+        System.out.println("\n--- Adventure Summary ---");
         System.out.println("Winner: " + result.getWinner());
-        System.out.println("Rounds: " + result.getRounds());
-        System.out.println("Reward: " + result.getReward());
+        System.out.println("Rounds fought: " + result.getRounds());
+        System.out.println("Reward earned: " + result.getReward());
+
+        System.out.println("\n--- Full Battle Log ---");
         for (String line : result.getLog()) {
             System.out.println(line);
         }
 
-        // TODO: Expand this demo so it clearly proves:
-        // 1) multiple decorator combinations
-        // 2) one full dungeon run through the facade
-        // 3) readable final summary
-
         System.out.println("\n=== Demo Complete ===");
+    }
+
+
+    private static void printAttackDetails(AttackAction action) {
+        System.out.println("[" + action.getActionName() + "]");
     }
 }

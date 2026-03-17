@@ -15,21 +15,43 @@ public class BattleService {
     }
 
     public AdventureResult battle(HeroProfile hero, BossEnemy boss, AttackAction action) {
-        // TODO: Implement the battle flow.
-        // Questions to answer:
-        // - Who attacks first?
-        // - How many rounds are allowed?
-        // - How is damage resolved?
-        // - How will randomness affect the result, if at all?
         AdventureResult result = new AdventureResult();
-        result.setWinner("TODO");
-        result.setRounds(0);
-        result.setReward("TODO");
-        result.addLine("TODO: implement battle logic");
+        int round = 1;
 
-        // Keep the field in use so students can decide whether to rely on it.
-        if (random.nextInt(1) == 0) {
-            // TODO: Replace placeholder branch with real deterministic or random logic.
+        result.addLine("Battle Start" + hero.getName() + " vs " + boss.getName() + "===");
+
+        while (hero.isAlive() && boss.isAlive() && round <= 20) {
+            result.addLine("\n[Round " + round + "]");
+
+            // 1. hero star the battle
+            int heroDamage = action.getDamage();
+            boss.takeDamage(heroDamage);
+            result.addLine(hero.getName() + " uses " + action.getActionName() +
+                    "dealing" + heroDamage + "damage. (" + action.getEffectSummary());
+
+            if (!boss.isAlive()) break;
+
+            //  boss starts battle
+            int bossDamage = boss.getAttackPower();
+            if (random.nextInt(10) > 7) {
+                bossDamage += 10;
+                result.addLine("critical " + boss.getName() + " strikes back with rage");
+            }
+
+            hero.takeDamage(bossDamage);
+            result.addLine(boss.getName() + "attacks" + hero.getName() + "for" + bossDamage + "damage");
+
+            round++;
+        }
+
+        //  who win
+        result.setRounds(round - 1);
+        if (hero.isAlive() && !boss.isAlive()) {
+            result.setWinner(hero.getName());
+            result.addLine("\nVICTORY! The boss has been defeated!");
+        } else {
+            result.setWinner(boss.getName());
+            result.addLine("\nDEFEAT! " + hero.getName() + "has fallen in battle...");
         }
 
         return result;
